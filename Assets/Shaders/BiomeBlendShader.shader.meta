@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 7cfc0fb891f7cb74a8d923015d9ce61e
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures:
+  - _BiomeTexture1: {fileID: 2800000, guid: 7dad35160842e7047900312871e92618, type: 3}
+  - _BiomeTexture2: {fileID: 2800000, guid: 430936c1e5ed7124ea2736f376435342, type: 3}
+  - _BiomeTexture3: {fileID: 2800000, guid: 8cc7cf63c70ecce4984ba4be48b74882, type: 3}
+  - _BiomeTexture4: {fileID: 2800000, guid: e7569f13821e8f743b1cdf8ae45f4bd9, type: 3}
+  - _BiomeTexture5: {fileID: 2800000, guid: 811f9ce617aa62748b2c1da051335ab0, type: 3}
+  nonModifiableTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
