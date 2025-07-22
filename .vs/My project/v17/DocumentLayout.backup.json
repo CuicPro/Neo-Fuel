@@ -3,16 +3,12 @@
   "WorkspaceRootPath": "C:\\Users\\adrid\\My project\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\adrid\\My project\\Assets\\Scripts\\PlayerController.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\Scripts\\PlayerController.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\adrid\\My project\\Assets\\Scripts\\World\\TerrainGenerator.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\Scripts\\World\\TerrainGenerator.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\adrid\\My project\\Assets\\Scripts\\CarEnterTrigger.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\Scripts\\CarEnterTrigger.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\adrid\\My project\\Assets\\Scripts\\VehicleController.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\Scripts\\VehicleController.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\adrid\\My project\\Temp\\GeneratedFromSurface-Custom-NewSurfaceShader.shader||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Temp\\GeneratedFromSurface-Custom-NewSurfaceShader.shader||{3B902123-F8A7-4915-9F01-361F908088D0}"
     }
   ],
   "DocumentGroupContainers": [
@@ -22,45 +18,32 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 2,
+          "SelectedChildIndex": 0,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "VehicleController.cs",
-              "DocumentMoniker": "C:\\Users\\adrid\\My project\\Assets\\Scripts\\VehicleController.cs",
-              "RelativeDocumentMoniker": "Assets\\Scripts\\VehicleController.cs",
-              "ToolTip": "C:\\Users\\adrid\\My project\\Assets\\Scripts\\VehicleController.cs",
-              "RelativeToolTip": "Assets\\Scripts\\VehicleController.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAZAAAAAAAAAA==",
+              "DocumentIndex": 0,
+              "Title": "TerrainGenerator.cs",
+              "DocumentMoniker": "C:\\Users\\adrid\\My project\\Assets\\Scripts\\World\\TerrainGenerator.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\World\\TerrainGenerator.cs",
+              "ToolTip": "C:\\Users\\adrid\\My project\\Assets\\Scripts\\World\\TerrainGenerator.cs",
+              "RelativeToolTip": "Assets\\Scripts\\World\\TerrainGenerator.cs",
+              "ViewState": "AgIAAIoEAAAAAAAAAAAmwLYEAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-16T19:02:06.203Z",
+              "WhenOpened": "2025-07-20T22:29:44.739Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "CarEnterTrigger.cs",
-              "DocumentMoniker": "C:\\Users\\adrid\\My project\\Assets\\Scripts\\CarEnterTrigger.cs",
-              "RelativeDocumentMoniker": "Assets\\Scripts\\CarEnterTrigger.cs",
-              "ToolTip": "C:\\Users\\adrid\\My project\\Assets\\Scripts\\CarEnterTrigger.cs",
-              "RelativeToolTip": "Assets\\Scripts\\CarEnterTrigger.cs",
-              "ViewState": "AgIAACQAAAAAAAAAAAAAADUAAAAGAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-16T19:02:05.48Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "PlayerController.cs",
-              "DocumentMoniker": "C:\\Users\\adrid\\My project\\Assets\\Scripts\\PlayerController.cs",
-              "RelativeDocumentMoniker": "Assets\\Scripts\\PlayerController.cs",
-              "ToolTip": "C:\\Users\\adrid\\My project\\Assets\\Scripts\\PlayerController.cs",
-              "RelativeToolTip": "Assets\\Scripts\\PlayerController.cs",
-              "ViewState": "AgIAAK8AAAAAAAAAAAAmwMYAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-16T12:42:41.963Z",
+              "Title": "GeneratedFromSurface-Custom-NewSurfaceShader.shader",
+              "DocumentMoniker": "C:\\Users\\adrid\\My project\\Temp\\GeneratedFromSurface-Custom-NewSurfaceShader.shader",
+              "RelativeDocumentMoniker": "Temp\\GeneratedFromSurface-Custom-NewSurfaceShader.shader",
+              "ToolTip": "C:\\Users\\adrid\\My project\\Temp\\GeneratedFromSurface-Custom-NewSurfaceShader.shader",
+              "RelativeToolTip": "Temp\\GeneratedFromSurface-Custom-NewSurfaceShader.shader",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAAdAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2025-07-20T23:46:44.668Z",
               "EditorCaption": ""
             }
           ]

@@ -12,4 +12,39 @@ MonoBehaviour:
   m_Script: {fileID: 0}
   m_Name: BiomesSettings
   m_EditorClassIdentifier: Assembly-CSharp::BiomesSettings
-  biomes: []
+  biomes:
+  - name: Plains
+    material: {fileID: 2100000, guid: 63c6906e975616f428c69f6b91139ac5, type: 2}
+    noiseScale: 0.01
+    heightScale: 2
+    heightThreshold: 0.399
+    spawnGroups:
+    - groupName: tree
+      spawnDensity: 0.166
+      prefabs:
+      - {fileID: 3201947013611667770, guid: 0e403b6a531ac064c9558d91a1be12e8, type: 3}
+      - {fileID: 5947183439004682991, guid: 150882436c9041546938c2d44ac9acd3, type: 3}
+      - {fileID: 7616507679668777215, guid: 9ac9959a28da31a48a148f91f718ddf1, type: 3}
+      - {fileID: 6848822895047334092, guid: 45666775a8e15c94dbddf6b9588f0555, type: 3}
+      - {fileID: 6239167598777059226, guid: 04597ce0aacfb9346b1811ef6fb2ea0b, type: 3}
+      - {fileID: 3525140769691756442, guid: 1263cc9ebce581f4c97c4dca761ef2f7, type: 3}
+  - name: Forest
+    material: {fileID: 2100000, guid: 9adfff84724f3e74ea684af940e4bc23, type: 2}
+    noiseScale: 0.02
+    heightScale: 7
+    heightThreshold: 1
+    spawnGroups:
+    - groupName: rock
+      spawnDensity: 0.068
+      prefabs:
+      - {fileID: 7056460441880482784, guid: 5848e10a7efba6146960e4473986cf9f, type: 3}
+    - groupName: tree
+      spawnDensity: 0.446
+      prefabs:
+      - {fileID: 1804244151549930758, guid: a9e8ec9d2ae5a9e46a3c2f168aef0d21, type: 3}
+      - {fileID: 5649586910099700326, guid: 1628b9bb55d40c74c80ba77cf05120bf, type: 3}
+      - {fileID: 4494341512636877629, guid: 827871e6a6970974dad0a86979f2afc2, type: 3}
+      - {fileID: 1892688962060378242, guid: c55fbaf5faa363c428c8ae328f1d631e, type: 3}
+      - {fileID: 3299460309311030865, guid: ba6a3796f5464cf468d3459b2b74b1b6, type: 3}
+      - {fileID: 8309130964281113202, guid: 2c393df2745c4b4459c4586dbc1d1f4b, type: 3}
+      - {fileID: 7423594646761524157, guid: 9adf7af000156bc439918111686ccf21, type: 3}

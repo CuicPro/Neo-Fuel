@@ -1,7 +1,8 @@
 ﻿using UnityEngine;
+using Unity.Netcode;
 
 [RequireComponent(typeof(CharacterController))]
-public class PlayerController : MonoBehaviour
+public class PlayerController : NetworkBehaviour
 {
     [Header("Movement")]
     public float walkSpeed = 3f;
@@ -36,6 +37,26 @@ public class PlayerController : MonoBehaviour
     private Vector3 velocity;
     private bool isGrounded;
 
+    private Camera playerCamera;
+
+    public override void OnNetworkSpawn()
+    {
+        if (!IsOwner)
+        {
+            enabled = false;
+            return;
+        }
+
+        // Active la caméra enfant uniquement pour le joueur local
+        playerCamera = GetComponentInChildren<Camera>();
+        if (playerCamera != null)
+            playerCamera.enabled = true;
+
+        // Si tu veux désactiver la caméra principale de la scène pour ce joueur
+        if (Camera.main != null)
+            Camera.main.enabled = false;
+    }
+
     void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;
@@ -48,8 +69,19 @@ public class PlayerController : MonoBehaviour
         if (staminaBar != null)
             staminaBar.maxValue = maxStamina;
 
-        // ✅ Affecte automatiquement la caméra si elle est vide
-        if (cameraTransform == null && Camera.main != null)
+        if (!IsOwner)
+        {
+            // Désactive la caméra enfant des autres joueurs
+            Camera cam = GetComponentInChildren<Camera>();
+            if (cam != null)
+                cam.enabled = false;
+            return;
+        }
+
+        // Ta logique existante, avec caméra assignée
+        if (playerCamera != null)
+            cameraTransform = playerCamera.transform;
+        else if (cameraTransform == null && Camera.main != null)
             cameraTransform = Camera.main.transform;
 
         // ✅ Positionne le joueur sur le sol si possible
@@ -77,6 +109,8 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+        if (!IsOwner) return;
+
         float inputX = Input.GetAxisRaw("Horizontal");
         float inputZ = Input.GetAxisRaw("Vertical");
         Vector3 inputDir = new Vector3(inputX, 0f, inputZ).normalized;
