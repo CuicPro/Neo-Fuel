@@ -52,8 +52,8 @@ public class PlayerSpawner : NetworkBehaviour
             return;
         }
 
-        if (NetworkManager.Singleton.ConnectedClients.ContainsKey(clientId) &&
-            NetworkManager.Singleton.ConnectedClients[clientId].PlayerObject != null)
+        if (NetworkManager.Singleton.ConnectedClients.TryGetValue(clientId, out var client) &&
+            client.PlayerObject != null)
         {
             Debug.LogWarning($"Le client {clientId} a déjà un PlayerObject. Spawn ignoré.");
             return;
@@ -72,34 +72,7 @@ public class PlayerSpawner : NetworkBehaviour
         }
 
         playerNetObj.SpawnAsPlayerObject(clientId);
-
         Debug.Log($"Joueur spawné pour le client {clientId} à la position {spawnPosition}");
-
-        if (clientId == NetworkManager.Singleton.LocalClientId)
-        {
-            // Active la caméra physique du joueur (et tout son rig)
-            Camera playerCam = playerInstance.GetComponentInChildren<Camera>(true);
-            if (playerCam != null)
-            {
-                playerCam.gameObject.SetActive(true);
-                Debug.Log("Caméra physique activée pour le joueur local");
-            }
-
-            // Désactive la caméra par défaut (de la scène)
-            GameObject defaultCam = GameObject.Find("DefaultCamera");
-            if (defaultCam != null)
-            {
-                defaultCam.SetActive(false);
-            }
-        }
-        else
-        {
-            // Pour les autres joueurs, on laisse caméra désactivée
-            Camera playerCam = playerInstance.GetComponentInChildren<Camera>(true);
-            if (playerCam != null)
-                playerCam.gameObject.SetActive(false);
-        }
-
     }
 
     private Vector3 GetValidSpawnPosition()

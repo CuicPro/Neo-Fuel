@@ -1,7 +1,9 @@
 ﻿using UnityEngine;
 using Unity.Netcode;
+using Unity.Netcode.Components;
 
 [RequireComponent(typeof(CharacterController))]
+[RequireComponent(typeof(NetworkAnimator))]
 public class PlayerController : NetworkBehaviour
 {
     [Header("Movement")]
@@ -29,119 +31,115 @@ public class PlayerController : NetworkBehaviour
     public float rotationSpeed = 10f;
 
     [Header("References")]
-    public Transform cameraTransform;
     public UnityEngine.UI.Slider staminaBar;
 
     private Animator animator;
+    private NetworkAnimator networkAnimator;
     private CharacterController controller;
     private Vector3 velocity;
     private bool isGrounded;
 
-    private Camera playerCamera;
+    // Variables réseau pour synchronisation des animations
+    private NetworkVariable<float> networkMoveX = new NetworkVariable<float>(
+        readPerm: NetworkVariableReadPermission.Everyone,
+        writePerm: NetworkVariableWritePermission.Owner);
+
+    private NetworkVariable<float> networkMoveZ = new NetworkVariable<float>(
+        readPerm: NetworkVariableReadPermission.Everyone,
+        writePerm: NetworkVariableWritePermission.Owner);
+
+    private NetworkVariable<bool> networkIsGrounded = new NetworkVariable<bool>(
+        readPerm: NetworkVariableReadPermission.Everyone,
+        writePerm: NetworkVariableWritePermission.Owner);
+
+    // Référence vers PlayerCameraController
+    private PlayerCameraController cameraController;
 
     public override void OnNetworkSpawn()
     {
+        cameraController = GetComponent<PlayerCameraController>();
+        if (cameraController == null)
+        {
+            Debug.LogError("PlayerCameraController not found! Make sure it's on the same GameObject as PlayerController.");
+        }
+
         if (!IsOwner)
         {
             enabled = false;
             return;
         }
-
-        // Active la caméra enfant uniquement pour le joueur local
-        playerCamera = GetComponentInChildren<Camera>();
-        if (playerCamera != null)
-            playerCamera.enabled = true;
-
-        // Si tu veux désactiver la caméra principale de la scène pour ce joueur
-        if (Camera.main != null)
-            Camera.main.enabled = false;
     }
 
     void Start()
     {
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
-
         controller = GetComponent<CharacterController>();
         animator = GetComponent<Animator>();
-        stamina = maxStamina;
+        networkAnimator = GetComponent<NetworkAnimator>();
 
+        stamina = maxStamina;
         if (staminaBar != null)
             staminaBar.maxValue = maxStamina;
 
-        if (!IsOwner)
-        {
-            // Désactive la caméra enfant des autres joueurs
-            Camera cam = GetComponentInChildren<Camera>();
-            if (cam != null)
-                cam.enabled = false;
-            return;
-        }
+        if (!IsOwner) return;
 
-        // Ta logique existante, avec caméra assignée
-        if (playerCamera != null)
-            cameraTransform = playerCamera.transform;
-        else if (cameraTransform == null && Camera.main != null)
-            cameraTransform = Camera.main.transform;
-
-        // ✅ Positionne le joueur sur le sol si possible
-        RaycastHit hit;
-        if (Physics.Raycast(transform.position + Vector3.up, Vector3.down, out hit, 10f))
+        // Positionne le joueur sur le sol si possible
+        if (Physics.Raycast(transform.position + Vector3.up, Vector3.down, out RaycastHit hit, 10f))
         {
             transform.position = hit.point;
         }
     }
 
-    void HandleCursor()
-    {
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
-        }
-
-        if (Input.GetMouseButtonDown(0))
-        {
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
-        }
-    }
-
     void Update()
     {
-        if (!IsOwner) return;
+        float smoothTime = 0.15f;
 
+        if (!IsOwner)
+        {
+            // Si pas owner, applique les valeurs réseau pour l'animation
+            animator.SetFloat("MoveX", networkMoveX.Value, smoothTime, Time.deltaTime);
+            animator.SetFloat("MoveZ", networkMoveZ.Value, smoothTime, Time.deltaTime);
+            animator.SetBool("IsGrounded", networkIsGrounded.Value);
+            return;
+        }
+
+        // INPUT
         float inputX = Input.GetAxisRaw("Horizontal");
         float inputZ = Input.GetAxisRaw("Vertical");
         Vector3 inputDir = new Vector3(inputX, 0f, inputZ).normalized;
         bool isMoving = inputDir.magnitude > 0.1f;
 
         // Camera-relative movement
-        Vector3 camForward = cameraTransform.forward;
-        camForward.y = 0f;
-        camForward.Normalize();
-
-        Vector3 camRight = cameraTransform.right;
-        camRight.y = 0f;
-        camRight.Normalize();
-
-        Vector3 moveDirection = (camForward * inputZ + camRight * inputX).normalized;
-
-        // Rotation vers direction du mouvement
-        if (isMoving)
+        Vector3 moveDirection = Vector3.zero;
+        if (cameraController != null && cameraController.GetCameraTransform() != null)
         {
-            float lookInputX = inputX;
-            float lookInputZ = Mathf.Abs(inputZ);
-            if (inputZ < 0) lookInputX = -inputX;
+            Transform cameraTransform = cameraController.GetCameraTransform();
 
-            Vector3 lookInputDir = new Vector3(lookInputX, 0f, lookInputZ).normalized;
-            Vector3 lookDirection = (camForward * lookInputDir.z + camRight * lookInputDir.x).normalized;
+            Vector3 camForward = cameraTransform.forward;
+            camForward.y = 0f;
+            camForward.Normalize();
 
-            Quaternion targetRot = Quaternion.LookRotation(lookDirection);
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, rotationSpeed * Time.deltaTime);
+            Vector3 camRight = cameraTransform.right;
+            camRight.y = 0f;
+            camRight.Normalize();
+
+            moveDirection = (camForward * inputZ + camRight * inputX).normalized;
+
+            // Rotation vers direction du mouvement
+            if (isMoving)
+            {
+                float lookInputX = inputX;
+                float lookInputZ = Mathf.Abs(inputZ);
+                if (inputZ < 0) lookInputX = -inputX;
+
+                Vector3 lookInputDir = new Vector3(lookInputX, 0f, lookInputZ).normalized;
+                Vector3 lookDirection = (camForward * lookInputDir.z + camRight * lookInputDir.x).normalized;
+
+                Quaternion targetRot = Quaternion.LookRotation(lookDirection);
+                transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, rotationSpeed * Time.deltaTime);
+            }
         }
 
-        // ----- Stamina / Running -----
+        // Stamina / Running logic
         bool shiftHeld = Input.GetKey(KeyCode.LeftShift);
         bool shiftReleased = Input.GetKeyUp(KeyCode.LeftShift);
 
@@ -181,11 +179,12 @@ public class PlayerController : NetworkBehaviour
         if (staminaBar != null)
             staminaBar.value = stamina;
 
+        // Vitesse cible et interpolation
         float targetSpeed = isMoving ? (isRunning ? runSpeed : walkSpeed) : 0f;
         float accel = (targetSpeed > currentSpeed) ? acceleration : deceleration;
         currentSpeed = Mathf.MoveTowards(currentSpeed, targetSpeed, accel * Time.deltaTime);
 
-        // ----- Gravity & Jump -----
+        // Gravité et saut
         Ray groundRay = new Ray(transform.position + Vector3.up * 0.2f, Vector3.down);
         isGrounded = Physics.Raycast(groundRay, 0.4f);
 
@@ -196,22 +195,20 @@ public class PlayerController : NetworkBehaviour
         {
             velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
             animator.SetTrigger("Jump");
+            networkAnimator.SetTrigger("Jump");
         }
 
         velocity.y += gravity * Time.deltaTime;
 
-        // ----- Movement -----
+        // Mouvement
         Vector3 move = moveDirection * currentSpeed;
         controller.Move((move + velocity) * Time.deltaTime);
 
-        HandleCursor();
-
-        // ----- Animator -----
+        // Calcul des paramètres animation
         float moveX = 0f;
         float moveZ = 0f;
 
-        // Calcule MoveZ en fonction de la vitesse réelle
-        float speedPercent = currentSpeed / runSpeed; // Entre 0 et 1
+        float speedPercent = currentSpeed / runSpeed;
 
         if (inputZ > 0.1f)
             moveZ = Mathf.Lerp(0f, 1f, speedPercent);
@@ -227,11 +224,14 @@ public class PlayerController : NetworkBehaviour
         else
             moveX = 0f;
 
-        float smoothTime = 0.15f; // temps de lissage (tu peux ajuster)
+        // Applique localement pour ce client
         animator.SetFloat("MoveX", moveX, smoothTime, Time.deltaTime);
         animator.SetFloat("MoveZ", moveZ, smoothTime, Time.deltaTime);
         animator.SetBool("IsGrounded", isGrounded);
 
-
+        // Synchronise les valeurs réseau
+        networkMoveX.Value = moveX;
+        networkMoveZ.Value = moveZ;
+        networkIsGrounded.Value = isGrounded;
     }
 }

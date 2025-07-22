@@ -412,7 +412,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
-  playerPrefab: {fileID: 2603365741807175861, guid: 13ca8a33d8ec5bf45841a92f3aa58125, type: 3}
+  playerPrefab: {fileID: 1688031133192796332, guid: a19793e4f5a0b4b45aad2f9f83653b66, type: 3}
   spawnOnConnection: 1
   defaultSpawnPosition: {x: 0, y: 0, z: 0}
   spawnHeight: 2
