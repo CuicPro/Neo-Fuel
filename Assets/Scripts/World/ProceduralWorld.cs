@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
+using System;
 
 [CreateAssetMenu(fileName = "BiomesSettings", menuName = "Procedural Generation/Biomes Settings")]
 public class BiomesSettings : ScriptableObject
@@ -109,6 +110,12 @@ public struct ObjectInteractionData : INetworkSerializable, System.IEquatable<Ob
 
 public class ProceduralWorld : NetworkBehaviour
 {
+    public event Action WorldGenerated;
+    public bool IsWorldInitialized()
+    {
+        return worldInitialized;
+    }
+
     [Header("Seed Settings")]
     public int seed = 42;
     public bool randomizeSeed = true;
@@ -154,7 +161,7 @@ public class ProceduralWorld : NetworkBehaviour
         if (IsServer)
         {
             if (randomizeSeed)
-                seed = Random.Range(0, int.MaxValue);
+                seed = UnityEngine.Random.Range(0, int.MaxValue);
 
             worldSeed.Value = seed;
             Debug.Log($"[Serveur] Seed du monde: {seed}");
@@ -244,6 +251,17 @@ public class ProceduralWorld : NetworkBehaviour
         previousChunksToKeep = new HashSet<Vector2Int>(chunksToKeep);
 
         worldInitialized = true;
+        WorldGenerated?.Invoke();
+        WeaponSpawner weaponSpawnerInstance = FindObjectOfType<WeaponSpawner>();
+        if (weaponSpawnerInstance != null)
+        {
+            weaponSpawnerInstance.OnGameStart();
+        }
+        else
+        {
+            Debug.LogWarning("WeaponSpawner non trouvé !");
+        }
+        Debug.Log(">>> WorldGenerated event déclenché !");
         Debug.Log($"[{(IsServer ? "Serveur" : "Client")}] Monde initial généré avec {localChunks.Count} chunks");
     }
 
@@ -330,7 +348,7 @@ public class ProceduralWorld : NetworkBehaviour
                 RemoveSpawnedObjectsFromChunk(coord);
                 Destroy(chunk);
                 localChunks.Remove(coord);
-                Debug.Log($"Chunk {coord} supprimé");
+                //Debug.Log($"Chunk {coord} supprimé");
             }
         }
 
@@ -339,13 +357,13 @@ public class ProceduralWorld : NetworkBehaviour
         {
             GameObject chunk = GenerateChunkLocally(coord);
             localChunks.Add(coord, chunk);
-            Debug.Log($"Chunk {coord} généré");
+            //Debug.Log($"Chunk {coord} généré");
         }
 
         // Mettre à jour les chunks précédents
         previousChunksToKeep = new HashSet<Vector2Int>(chunksToKeep);
 
-        Debug.Log($"Update terminé: {localChunks.Count} chunks actifs");
+        //Debug.Log($"Update terminé: {localChunks.Count} chunks actifs");
     }
 
     private void AddChunksAroundPosition(Vector2Int centerChunk)
@@ -572,8 +590,8 @@ public class ProceduralWorld : NetworkBehaviour
 
         for (int attempts = 0; attempts < 20; attempts++)
         {
-            float x = Random.Range(-halfChunk + 5f, halfChunk - 5f);
-            float z = Random.Range(-halfChunk + 5f, halfChunk - 5f);
+            float x = UnityEngine.Random.Range(-halfChunk + 5f, halfChunk - 5f);
+            float z = UnityEngine.Random.Range(-halfChunk + 5f, halfChunk - 5f);
             float height = GetHeightWeighted(x, z);
 
             Vector3 spawnPos = new Vector3(x, height + 3f, z);
