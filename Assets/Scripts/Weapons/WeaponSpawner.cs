@@ -1,4 +1,5 @@
 using UnityEngine;
+using Unity.Netcode;
 using System.Collections.Generic;
 
 [System.Serializable]
@@ -13,12 +14,13 @@ public class WeaponSpawner : MonoBehaviour
     public List<WeaponData> weapons;
     public float spawnRadius = 20f;
     public int maxWeapons = 10;
+    public float spawnHeight = 60f;
 
     private bool gameStarted = false;
 
     void Update()
     {
-        if (!gameStarted) return;
+        if (!gameStarted || !NetworkManager.Singleton.IsServer) return;
 
         int currentWeapons = GameObject.FindGameObjectsWithTag("Weapon").Length;
         if (currentWeapons < maxWeapons)
@@ -42,11 +44,25 @@ public class WeaponSpawner : MonoBehaviour
         }
 
         Vector3 spawnPos = GetRandomSpawnPosition();
-        GameObject weapon = Instantiate(prefab, spawnPos, Quaternion.identity);
+        Quaternion rotation = Quaternion.identity;
+
+        // === Instanciation Réseau ===
+        GameObject weaponObj = Instantiate(prefab, spawnPos, rotation);
+
+        NetworkObject netObj = weaponObj.GetComponent<NetworkObject>();
+        if (netObj != null)
+        {
+            netObj.Spawn(true);
+        }
+        else
+        {
+            Debug.LogWarning($"Le prefab {prefab.name} n'a pas de NetworkObject !");
+        }
 
         // Rigidbody config
-        Rigidbody rb = weapon.GetComponent<Rigidbody>();
-        if (rb == null) rb = weapon.AddComponent<Rigidbody>();
+        Rigidbody rb = weaponObj.GetComponent<Rigidbody>();
+        if (rb == null) rb = weaponObj.AddComponent<Rigidbody>();
+
         rb.useGravity = true;
         rb.mass = 0.2f;
         rb.linearDamping = 1f;
@@ -55,15 +71,15 @@ public class WeaponSpawner : MonoBehaviour
         rb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
 
         // Collider solide
-        if (!weapon.GetComponent<Collider>())
+        if (!weaponObj.GetComponent<Collider>())
         {
-            MeshCollider meshCol = weapon.AddComponent<MeshCollider>();
+            MeshCollider meshCol = weaponObj.AddComponent<MeshCollider>();
             meshCol.convex = true;
         }
 
-        // === Ajout trigger pour pickup ===
+        // === Ajout du trigger pickup ===
         GameObject triggerObj = new GameObject("PickupTrigger");
-        triggerObj.transform.SetParent(weapon.transform);
+        triggerObj.transform.SetParent(weaponObj.transform);
         triggerObj.transform.localPosition = Vector3.zero;
 
         SphereCollider trigger = triggerObj.AddComponent<SphereCollider>();
@@ -73,7 +89,7 @@ public class WeaponSpawner : MonoBehaviour
         PickupWeapon pickupScript = triggerObj.AddComponent<PickupWeapon>();
         pickupScript.weaponPrefab = prefab;
 
-        weapon.tag = "Weapon";
+        weaponObj.tag = "Weapon";
     }
 
     private GameObject GetRandomWeaponPrefab()
@@ -97,7 +113,7 @@ public class WeaponSpawner : MonoBehaviour
     private Vector3 GetRandomSpawnPosition()
     {
         Vector2 circle = Random.insideUnitCircle * spawnRadius;
-        Vector3 origin = new Vector3(circle.x, 50f, circle.y);
+        Vector3 origin = new Vector3(circle.x, spawnHeight, circle.y);
 
         if (Physics.Raycast(origin, Vector3.down, out RaycastHit hit, 100f))
             return hit.point + Vector3.up * 0.5f;

@@ -3,22 +3,20 @@ using UnityEngine;
 
 public class PlayerInventory : MonoBehaviour
 {
-    [Header("Slots Visuels")]
-    public Transform mainHandSlot;         // Arme tenue en main (visible)
-    public Transform[] holsterSlots;       // Armes visibles sur le joueur (2 slots)
+    [Header("Emplacements visuels")]
+    public Transform mainHandSlot;         // Emplacement dans la main
+    public Transform[] holsterSlots;       // Emplacements sur le corps
 
-    private List<GameObject> weapons = new List<GameObject>(); // Liste des modèles d'armes
-    private int activeWeaponIndex = -1; // Index de l'arme active (-1 = aucune)
+    private List<GameObject> weapons = new();  // Toutes les armes en jeu
+    private int activeWeaponIndex = -1;
 
     void Start()
     {
-        // Optionnel : désactiver toutes les armes au départ
         UpdateWeaponVisibility();
     }
 
     void Update()
     {
-        // Exemple simple : changement d'arme avec touches 1, 2, 3
         if (Input.GetKeyDown(KeyCode.Alpha1)) SwitchWeapon(0);
         if (Input.GetKeyDown(KeyCode.Alpha2)) SwitchWeapon(1);
         if (Input.GetKeyDown(KeyCode.Alpha3)) SwitchWeapon(2);
@@ -32,100 +30,120 @@ public class PlayerInventory : MonoBehaviour
             return false;
         }
 
-        GameObject weaponModel;
+        GameObject weaponInstance;
+        Transform targetSlot;
 
         if (weapons.Count == 0)
         {
-            // Première arme ? main hand
-            weaponModel = Instantiate(weaponPrefab, mainHandSlot);
+            // Arme en main
+            targetSlot = mainHandSlot;
             activeWeaponIndex = 0;
         }
         else
         {
-            // Autres armes ? holsters
-            int holsterIndex = weapons.Count - 1; // 1ère arme dans holsterSlots[0], 2ème dans holsterSlots[1]
+            // Holster
+            int holsterIndex = weapons.Count - 1;
             if (holsterIndex >= holsterSlots.Length)
             {
-                Debug.LogWarning("Pas assez de holsters définis !");
+                Debug.LogWarning("Pas assez de slots de holster !");
                 return false;
             }
-            weaponModel = Instantiate(weaponPrefab, holsterSlots[holsterIndex]);
+            targetSlot = holsterSlots[holsterIndex];
         }
 
-        weaponModel.transform.localPosition = Vector3.zero;
-        weaponModel.transform.localRotation = Quaternion.identity;
+        weaponInstance = Instantiate(weaponPrefab, targetSlot);
+        weaponInstance.SetActive(true);
+        weaponInstance.transform.localPosition = Vector3.zero;
+        weaponInstance.transform.localRotation = Quaternion.identity;
 
-        DestroyComponentsForDisplay(weaponModel);
+        RemoveUnnecessaryComponents(weaponInstance);
 
-        weapons.Add(weaponModel);
+        // Assigner owner si script Weapon
+        Weapon weaponScript = weaponInstance.GetComponent<Weapon>();
+        if (weaponScript != null)
+        {
+            weaponScript.owner = gameObject;
 
-        Debug.Log($"Arme ajoutée à l'inventaire ({weapons.Count - 1}) : {weaponPrefab.name}");
+            // Lier dynamiquement l'Animator du joueur
+            Animator anim = GetComponent<Animator>();
+            if (anim != null)
+            {
+                weaponScript.playerAnimator = anim;
+            }
+        }
+
+
+        weapons.Add(weaponInstance);
+        Debug.Log($"Arme ajoutée : {weaponPrefab.name}");
         PrintInventory();
 
         UpdateWeaponVisibility();
-
         return true;
     }
 
-    private void DestroyComponentsForDisplay(GameObject obj)
+    void RemoveUnnecessaryComponents(GameObject weapon)
     {
-        foreach (var rb in obj.GetComponentsInChildren<Rigidbody>())
+        foreach (var rb in weapon.GetComponentsInChildren<Rigidbody>())
             Destroy(rb);
-
-        foreach (var col in obj.GetComponentsInChildren<Collider>())
+        foreach (var col in weapon.GetComponentsInChildren<Collider>())
             Destroy(col);
-
-        foreach (var pickup in obj.GetComponentsInChildren<PickupWeapon>())
+        foreach (var pickup in weapon.GetComponentsInChildren<PickupWeapon>())
             Destroy(pickup);
     }
 
     public void SwitchWeapon(int index)
     {
-        if (index < 0 || index >= weapons.Count)
-        {
-            Debug.LogWarning("Index arme invalide.");
-            return;
-        }
-
-        if (activeWeaponIndex == index)
-            return; // Déjà active
+        if (index < 0 || index >= weapons.Count) return;
+        if (activeWeaponIndex == index) return;
 
         activeWeaponIndex = index;
         UpdateWeaponVisibility();
-
-        Debug.Log($"Arme active changée à l'index {index}: {weapons[index].name}");
+        Debug.Log($"Changement vers l’arme {index + 1} : {weapons[index].name}");
     }
 
-    private void UpdateWeaponVisibility()
+    void UpdateWeaponVisibility()
     {
         for (int i = 0; i < weapons.Count; i++)
         {
-            if (i == activeWeaponIndex)
+            GameObject weapon = weapons[i];
+            bool isActive = (i == activeWeaponIndex);
+
+            // Change de parent (main ou holster)
+            if (isActive)
             {
-                // Arme active ? position mainHandSlot
-                weapons[i].transform.SetParent(mainHandSlot);
-                weapons[i].transform.localPosition = Vector3.zero;
-                weapons[i].transform.localRotation = Quaternion.identity;
-                weapons[i].SetActive(true);
+                weapon.transform.SetParent(mainHandSlot);
             }
             else
             {
-                // Arme inactive ? holster correspondant
                 int holsterIndex = i - 1;
                 if (holsterIndex >= 0 && holsterIndex < holsterSlots.Length)
                 {
-                    weapons[i].transform.SetParent(holsterSlots[holsterIndex]);
-                    weapons[i].transform.localPosition = Vector3.zero;
-                    weapons[i].transform.localRotation = Quaternion.identity;
-                    weapons[i].SetActive(true);
-                }
-                else
-                {
-                    // Si pas de holster dispo (cas non prévu), on cache l'arme
-                    weapons[i].SetActive(false);
+                    weapon.transform.SetParent(holsterSlots[holsterIndex]);
                 }
             }
+
+            // Réinitialise position/rotation locale
+            weapon.transform.localPosition = Vector3.zero;
+            weapon.transform.localRotation = Quaternion.identity;
+
+            // Active l'objet
+            weapon.SetActive(true);
+
+            //  Met à jour isEquipped
+            Weapon weaponScript = weapon.GetComponent<Weapon>();
+            if (weaponScript != null)
+            {
+                weaponScript.isEquipped = isActive;
+            }
         }
+    }
+
+
+    public GameObject GetActiveWeapon()
+    {
+        if (activeWeaponIndex >= 0 && activeWeaponIndex < weapons.Count)
+            return weapons[activeWeaponIndex];
+        return null;
     }
 
     public void PrintInventory()
@@ -133,8 +151,8 @@ public class PlayerInventory : MonoBehaviour
         Debug.Log("=== INVENTAIRE ===");
         for (int i = 0; i < weapons.Count; i++)
         {
-            string activeMark = (i == activeWeaponIndex) ? " (Active)" : "";
-            Debug.Log($"Slot {i + 1}: {weapons[i].name}{activeMark}");
+            string active = (i == activeWeaponIndex) ? " (Active)" : "";
+            Debug.Log($"Slot {i + 1}: {weapons[i].name}{active}");
         }
     }
 }
