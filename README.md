@@ -72,4 +72,3 @@ Projet développé par **Studio Indé** – passion, créativité et chaos motor
 ---
 
 ```markdown
-![Nom de l'image](chemin/vers/image.png)
